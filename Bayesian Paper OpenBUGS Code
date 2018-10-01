@@ -1,0 +1,193 @@
+## ---------------------------
+## ------------ 4 ------------
+## ---------------------------
+
+model
+{
+for (i in 1:2)
+{
+r[i] ~ dbin(theta[i], n[i])
+theta[i] ~ dbeta(0.5, 0.5)
+}
+ve <- 1-(theta[1]/theta[2])
+}
+#data
+list(r=c(51,74), n=c(8197, 8198))
+
+
+
+## ---------------------------
+## ------------ 5 ------------
+## ---------------------------
+model
+{
+#prior
+p.tr~dbeta(0.5,0.5)
+p.pl~dbeta(0.5,0.5)
+#likelihood
+r.tr~dbin(p.tr,n.tr)
+r.pl~dbin(p.pl,n.pl)
+#difference
+diff<-p.pl-p.tr
+or<- (p.pl/(1-p.pl))/(p.tr/(1-p.tr))
+rr<-(p.pl/p.tr)
+pdiff<-step(diff)
+por<-step(or-1)
+prr<-step(rr-1)
+}
+#data
+list(r.tr=51, n.tr=8197,
+	r.pl=74,n.pl=8198)
+    
+## ---------------------------
+## ------------ 6 ------------
+## ---------------------------
+model
+{
+  for (i in 1:2) 
+  { 
+  r[i] ~ dbin(theta[i],n[i]) 
+  r.pred[i] ~ dbin(theta[i], m[i])
+  theta[i] ~ dbeta(0.5,0.5) 
+  }
+}
+
+# Data 
+list(r=c(56,76), n=c(8202,8200),m=c(100,100))
+
+## ---------------------------
+## ----------- 7.1 -----------
+## ---------------------------
+##
+## 7.1 - flat prior to estimate theta
+##
+
+model
+{
+	for (i in 1:2)
+	{ 
+		r[i] ~ dbin(theta[i], n[i])
+		theta[i] ~ dunif(0,1)
+	}
+}
+#Data
+list(r=c(51,74), n=c(8197, 8198))
+
+
+##
+## 7.1 - flat prior to estimate VE
+##
+
+model
+{
+for (i in 1:2)
+{
+r[i] ~ dbin(theta[i], n[i])
+theta[i] ~dbeta(1,1)
+}
+ve <- 1-(theta[1]/theta[2])
+}
+#data
+list(r=c(51,74), n=c(8197, 8198))
+
+##
+## 7.1 - flat prior to estimate OR, RR, DIFF
+##
+
+model
+{
+#prior
+p.tr~dunif(0,1)
+p.pl~dunif(0,1)
+#likelihood
+r.tr~dbin(p.tr,n.tr)
+r.pl~dbin(p.pl,n.pl)
+#difference
+diff<-p.pl-p.tr
+or<- (p.pl/(1-p.pl))/(p.tr/(1-p.tr))
+rr<-(p.pl/p.tr)
+ppos<-step(or-1)
+}
+#data
+list(r.tr=51, n.tr=8197, r.pl=74,n.pl=8198)
+
+## ---------------------------
+## ----------- 7.2 -----------
+## ---------------------------
+##
+## 7.2 - estimate parameters from previous study
+##
+
+model
+{
+	for (i in 1:2)
+	{
+		r[i] ~ dbin(theta[i], n[i])
+		theta[i] ~ dbeta(0.5,0.5)
+	}
+}
+
+# Mean
+#Theta_1 (p.pl): Mean=0.006886, std= 0.0009139. tau=1/(0.0009139)^2=1197299.0705
+#Theta_2 (p.tr): Mean=0.009321 std= 0.00106, tau=1/(0.00106)^2=889996.440014 
+
+# Data from previous study
+list(r=c(56,76), n=c(8202, 8200))
+
+##
+## 7.2 - current study with prior from previous study
+##
+
+model
+{
+#prior
+p.pl~dnorm(0.009317,896751.606958)
+p.tr~dnorm(0.006884,1197823.2820)
+#likelihood
+r.pl~dbin(p.pl,n.pl)
+r.tr~dbin(p.tr,n.tr)
+}
+
+#data
+list(r.tr=51, n.tr=8197, r.pl=74,n.pl=8198)
+
+##
+## 7.2 - prior from previous study to estimate VE
+##
+
+model
+{
+#prior
+p.pl~dnorm(0.009317,896751.606958)
+p.tr~dnorm(0.006884,1197823.2820)
+#likelihood
+r.pl~dbin(p.pl,n.pl)
+r.tr~dbin(p.tr,n.tr)
+#VE
+ve <- 1-(p.tr/p.pl)
+}
+
+#data
+list(r.tr=51, n.tr=8197, r.pl=74,n.pl=8198)
+
+##
+## 7.2 - prior from previous study to estimate OR, RR, DIFF
+##
+
+model
+{
+#prior
+p.pl~dnorm(0.009317,896751.606958)
+p.tr~dnorm(0.006884,1197823.2820)
+#likelihood
+r.tr~dbin(p.tr,n.tr)
+r.pl~dbin(p.pl,n.pl)
+#difference
+diff<-p.pl-p.tr
+or<- (p.pl/(1-p.pl))/(p.tr/(1-p.tr))
+rr<-(p.pl/p.tr)
+ppos<-step(or-1)
+}
+
+#data
+list(r.tr=51, n.tr=8197, r.pl=74,n.pl=8198)
